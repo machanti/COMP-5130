@@ -73,8 +73,8 @@ def main():
 
         print("\tPredicting")
         arima_prediction = arima.predict(len(test_set)).astype(int)
-        print(f"\t\tARIMA MAE: {mae(arima_prediction, test_set)}")
-        print(f"\t\tARIMA MSE: {mse(arima_prediction, test_set)}")
+        print(f"\t\tARIMA{arima.order} MAE: {mae(arima_prediction, test_set)}")
+        print(f"\t\tARIMA{arima.order} MSE: {mse(arima_prediction, test_set)}")
 
         future = proph.make_future_dataframe(periods=len(test_set), freq=frequency)
         proph_prediction = proph.predict(future)[["ds", "yhat"]][split_index:].set_index("ds")["yhat"].astype(int)
@@ -84,14 +84,14 @@ def main():
         print("\tCreating plots")
 
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 12))
-        ax1.set_title(f"Time Series with ARIMA and Prophet Predictions ({name})")
+        ax1.set_title(f"Time Series with ARIMA{arima.order} and Prophet Predictions ({name})")
         ax1.plot(data.index, data, label="Actual Data", color="black")
-        ax1.plot(test_set.index, arima_prediction, label="ARIMA Prediction", color="blue")
+        ax1.plot(test_set.index, arima_prediction, label=f"ARIMA{arima.order} Prediction", color="blue")
         ax1.plot(test_set.index, proph_prediction, label="Prophet Prediction", color="red")
         ax1.legend()
 
         ax2.plot(test_set.index, test_set, label="Actual Data", color="black")
-        ax2.plot(test_set.index, arima_prediction, label="ARIMA Prediction", color="blue")
+        ax2.plot(test_set.index, arima_prediction, label=f"ARIMA{arima.order} Prediction", color="blue")
         ax2.plot(test_set.index, proph_prediction, label="Prophet Prediction", color="red")
 
         for ax in [ax1, ax2]:
