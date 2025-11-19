@@ -5,7 +5,8 @@ dependencies = [
   "matplotlib",
   "prophet",
   "pmdarima",
-  "numpy"
+  "numpy",
+  "pandas"
 ]
 
 [project.scripts]

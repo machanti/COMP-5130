@@ -4,23 +4,21 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
   };
 
-  outputs = inputs @ {
-    flake-parts,
-    ...
-  }:
+  outputs = inputs @ {flake-parts, ...}:
     flake-parts.lib.mkFlake {inherit inputs;} {
       systems = ["x86_64-linux"];
-      perSystem = {
-        pkgs,
-        ...
-      }: {
+      perSystem = {pkgs, ...}: {
         devShells.default = pkgs.mkShellNoCC {
-          packages = [pkgs.python.withPackages (pp: with pp; [
-              numpy
-              matplotlib
-              pmdarima
-              prophet
-            ])];
+          packages = [
+            (pkgs.python3.withPackages (pp:
+              with pp; [
+                numpy
+                matplotlib
+                (pmdarima.overridePythonAttrs {doCheck = false;})
+                prophet
+                pandas
+              ]))
+          ];
         };
       };
     };
