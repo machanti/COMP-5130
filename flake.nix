@@ -13,21 +13,14 @@
       perSystem = {
         pkgs,
         ...
-      }: let
-        project = (fromTOML (builtins.readFile ./src/pyproject.toml)).project;
-        deps = map (x: pkgs.python3.pkgs.${x}.overridePythonAttrs {doCheck = false;}) project.dependencies;
-      in {
-        # TODO: fix this
-        packages.default = pkgs.python3.pkgs.buildPythonApplication {
-          pname = project.name;
-          version = project.version;
-          src = ./src;
-          pyproject = true;
-          doCheck = false;
-          build-system = [pkgs.python3.pkgs.setuptools];
-        };
+      }: {
         devShells.default = pkgs.mkShellNoCC {
-          packages = [pkgs.python.withPackages (_: deps)];
+          packages = [pkgs.python.withPackages (pp: with pp; [
+              numpy
+              matplotlib
+              pmdarima
+              prophet
+            ])];
         };
       };
     };
