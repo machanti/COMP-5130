@@ -31,6 +31,7 @@ def preproc_csgo(df: pd.DataFrame, freq: str) -> pd.Series:
     upper_bound = Q3 + (1.5 * IQR)
     resampled.loc[(resampled < lower_bound) | (resampled > upper_bound)] = np.nan
 
+    # Interpolate between removed outliers
     resampled = resampled.interpolate()
 
     # Convert to integers (you cannot have 0.5 players in a game)
@@ -83,6 +84,7 @@ def main():
 
         print("\tCreating plots")
 
+        print("\t\tPrediction plot")
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 12))
         ax1.set_title(f"Time Series with ARIMA{arima.order} and Prophet Predictions ({name})")
         ax1.plot(data.index, data, label="Actual Data", color="black")
@@ -99,7 +101,7 @@ def main():
             ax.set_ylabel("Value")
             ax.grid(alpha=0.3)
 
-        fig.savefig(output_dir / f"{name}.png")
+        fig.savefig(output_dir / f"{name}_prediction.png")
 
 
 
