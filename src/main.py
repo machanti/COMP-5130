@@ -12,7 +12,7 @@ def mae(actual: pd.Series, expected: pd.Series) -> float:
 def mse(actual: pd.Series, expected: pd.Series) -> float:
     return np.mean(np.pow(actual - expected, 2))
 
-def preproc(df: pd.DataFrame, freq: str, timestamp: str, value: str) -> pd.Series:
+def preproc(df: pd.DataFrame, freq: str, timestamp: str, value: str, isint: bool) -> pd.Series:
     timestamps = pd.to_datetime(df[timestamp])
 
     # Interpolate
@@ -35,36 +35,15 @@ def preproc(df: pd.DataFrame, freq: str, timestamp: str, value: str) -> pd.Serie
     resampled = resampled.interpolate()
 
     # Convert to integers (you cannot have 0.5 players in a game)
-    return pd.Series(resampled).astype(int)
-'''
-def preproc_mel(df: pd.DataFrame, freq: str) -> pd.Series:
-    timestamps = pd.to_datetime(df["Date"])
+    if isint:
+        return pd.Series(resampled).astype(int)
+    else:
+        return pd.Series(resampled)
 
-    #Interpolate
-    df["Min Temp"] = df["Min Temp"].interpolate()
-
-    s = pd.Series(list(df["Min Temp"]), index=list(timestamps))
-
-    # Resample and interpolate
-    resampled = s.resample(freq).interpolate()
-
-    # Remove Outliers
-    Q1 = resampled.quantile(0.25)
-    Q3 = resampled.quantile(0.75)
-    IQR = Q3 - Q1
-    lower_bound = Q1 - (1.5 * IQR)
-    upper_bound = Q3 + (1.5 * IQR)
-    resampled.loc[(resampled < lower_bound) | (resampled > upper_bound)] = np.nan
-
-    # Resample and interpolate
-    resampled = resampled.interpolate()
-
-    return pd.Series(resampled)
-'''
 
 DATASETS = [
-    ("csgo", preproc, "2D", "DateTime", "Players"),
-    ("mel", preproc, "1D", "Date", "Min Temp"),
+    ("csgo", "2D", "DateTime", "Players", True),
+    ("mel", "1D", "Date", "Min Temp", False),
 
 ]
 SPLIT_PERCENT = 0.1 # Remove last 10% of dataset, and try and predict it
@@ -78,12 +57,12 @@ def main():
 
     metrics = []
 
-    for name, preproc_func, frequency, timestamp, value in DATASETS:
+    for name, frequency, timestamp, value in DATASETS:
         print(f"Analyzing dataset {name}")
         print("\tLoading dataset")
         df = pd.read_csv(data_dir / f"{name}.csv")
         print("\tPreprocessing dataset")
-        data = preproc_func(df, frequency, timestamp, value)
+        data = preproc(df, frequency, timestamp, value)
         print(f"\t\tProcessed dataset size: {len(data)}")
 
         print("\tSplitting dataset")
